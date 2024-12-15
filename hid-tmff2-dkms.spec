@@ -3,18 +3,20 @@
 %global commit_number 274
 %global git_date 20241208T174257Z
 
-Name:           hid-tmff2-dkms
-Version:        r%{commit_number}.%{shortcommit}
-Release:        %autorelease
-Summary:        Linux kernel module (DKMS) for Thrustmaster T300RS, T248, TX, and TS-XW
-License:        GPL-3.0
-URL:            https://github.com/Kimplul/hid-tmff2
-Source0:        %{url}/archive/%{commit}.tar.gz
-BuildArch:      noarch
+Name:            hid-tmff2-dkms
+Version:         r%{commit_number}.%{shortcommit}
+Release:         %autorelease
+Summary:         Linux kernel module (DKMS) for Thrustmaster T300RS, T248, TX, and TS-XW
+License:         GPL-3.0
+URL:             https://github.com/Kimplul/hid-tmff2
+Source0:         %{url}/archive/%{commit}.tar.gz
+BuildArch:       noarch
 
-BuildRequires:  git
-BuildRequires:  make
-Requires:       dkms
+BuildRequires:   git
+BuildRequires:   make
+Requires(post):  dkms
+Requires(preun): dkms
+Requires:        kernel-devel-matched
 
 Provides:       hid-tmff2-dkms = %{version}-%{release}
 Conflicts:      hid-tmff2
@@ -25,7 +27,8 @@ Linux kernel module for Thrustmaster T300RS, T248, TX, and TS-XW using DKMS.
 %prep
 %autosetup -n hid-tmff2-%{commit}
 git init
-git submodule update --init --recursive
+rm deps/hid-tminit -rf
+git submodule add -b usb https://github.com/Kimplul/hid-tminit.git deps/hid-tminit
 
 %build
 # No build step necessary for DKMS modules
