@@ -1,0 +1,68 @@
+name: Check for repository updates
+
+on:
+  schedule:
+    - cron: "0 */6 * * *"
+  workflow_dispatch:
+
+jobs:
+  check-and-build:
+    runs-on: ubuntu-latest
+
+    env:
+      GITHUB_REPO: Kimplul/hid-tmff2
+      BRANCH: master
+
+    steps:
+      - name: Checkout the repository
+        uses: actions/checkout@v4
+
+      - name: Fetch the latest commit hash from target repository
+        id: fetch_commit
+        run: |
+          LATEST_COMMIT=$(curl -s "https://api.github.com/repos/${GITHUB_REPO}/commits/${BRANCH}" | jq -r '.sha')
+          TOTAL_COMMITS=$(curl -sI "https://api.github.com/repos/${GITHUB_REPO}/commits?per_page=1" \
+            | grep -i "Link:" \
+            | sed -n 's/.*&page=\([0-9]*\)>; rel="last".*/\1/p')
+          GIT_DATE=$(curl -s "https://api.github.com/repos/${GITHUB_REPO}/commits/${BRANCH}" | jq -r '.commit.committer.date' | sed 's/[-:]//g')
+
+          echo "Latest commit hash: $LATEST_COMMIT"
+          echo "Total commits: $TOTAL_COMMITS"
+          echo "Commit date: $GIT_DATE"
+
+          echo "latest_commit=$LATEST_COMMIT" >> $GITHUB_OUTPUT
+          echo "total_commits=$TOTAL_COMMITS" >> $GITHUB_OUTPUT
+          echo "git_date=$GIT_DATE" >> $GITHUB_OUTPUT
+
+      - name: Get current commit hash
+        id: get_current_commit
+        run: |
+          CURRENT_COMMIT=$(grep -oP '(?<=^%global commit ).*' *.spec)
+
+          echo "Current commit hash: $CURRENT_COMMIT"
+          echo "current_commit=$CURRENT_COMMIT" >> $GITHUB_OUTPUT
+
+      - name: Compare the commit hashes
+        id: compare_commit
+        run: |
+          if [ "${{ steps.fetch_commit.outputs.latest_commit }}" == "${{ steps.get_current_commit.outputs.current_commit }}" ]; then
+            echo "new_commit=false" >> $GITHUB_OUTPUT
+          else
+            echo "new_commit=true" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Update the spec file
+        if: steps.compare_commit.outputs.new_commit == 'true'
+        run: |
+          sed -i "s/^%global commit .*/%global commit ${{ steps.fetch_commit.outputs.latest_commit }}/" *.spec
+          sed -i "s/^%global commit_number .*/%global commit_number ${{ steps.fetch_commit.outputs.total_commits }}/" *.spec
+          sed -i "s/^%global git_date .*/%global git_date ${{ steps.fetch_commit.outputs.git_date }}/" *.spec
+
+      - name: Commit and push the changes
+        if: steps.compare_commit.outputs.new_commit == 'true'
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email 'github-actions[bot]@users.noreply.github.com'
+          git add *.spec
+          git commit -m "[hid-tmff2] Update to commit ${{ steps.fetch_commit.outputs.latest_commit }}"
+          git push
