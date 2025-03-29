@@ -7,7 +7,11 @@ on:
 
 jobs:
   check-and-build:
+    name: Check & build
     runs-on: ubuntu-latest
+
+    permissions:
+      contents: write
 
     env:
       GITHUB_REPO: Kimplul/hid-tmff2
@@ -66,3 +70,18 @@ jobs:
           git add *.spec
           git commit -m "[hid-tmff2] Update to commit ${{ steps.fetch_commit.outputs.latest_commit }}"
           git push
+
+  keepalive-job:
+    name: Keepalive Workflow
+    runs-on: ubuntu-latest
+
+    permissions:
+      actions: write
+
+    steps:
+      - name: Checkout the repository
+        uses: actions/checkout@v4
+
+      - name: Keep alive the workflow
+        uses: gautamkrishnar/keepalive-workflow@v2
+
