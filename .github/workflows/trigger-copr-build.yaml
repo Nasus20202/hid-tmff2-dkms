@@ -76,7 +76,7 @@ jobs:
     runs-on: ubuntu-latest
 
     permissions:
-      actions: write
+      contents: write
 
     steps:
       - name: Checkout the repository
