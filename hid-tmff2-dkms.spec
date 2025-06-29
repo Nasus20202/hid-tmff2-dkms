@@ -1,7 +1,7 @@
-%global commit d4c9e065ca41b30e1cb7a9852ba182b53a669b9c
+%global commit 49adf5c48ba2784d97384619a52e875daf4bc062
 %global shortcommit %(c=%{commit}; echo ${c:0:7})
-%global commit_number 283
-%global git_date 20250422T170548Z
+%global commit_number 284
+%global git_date 20250628T150340Z
 
 Name:            hid-tmff2-dkms
 Version:         r%{commit_number}.%{shortcommit}
