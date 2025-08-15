@@ -19,7 +19,7 @@ jobs:
 
     steps:
       - name: Checkout the repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: Fetch the latest commit hash from target repository
         id: fetch_commit
@@ -80,7 +80,7 @@ jobs:
 
     steps:
       - name: Checkout the repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: Keep alive the workflow
         uses: efrecon/gh-action-keepalive@main
