@@ -1,7 +1,7 @@
-%global commit null
+%global commit 8187920ed261c7024826f8204cc7bea45153a3da
 %global shortcommit %(c=%{commit}; echo ${c:0:7})
-%global commit_number 
-%global git_date null
+%global commit_number 311
+%global git_date 20260310T061834Z
 
 Name:            hid-tmff2-dkms
 Version:         r%{commit_number}.%{shortcommit}
